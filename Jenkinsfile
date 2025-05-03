@@ -30,10 +30,10 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                bat 'kubectl apply -f k8s/pvc.yml'
-                bat 'kubectl apply -f k8s/deployment.yml'
-                bat 'kubectl apply -f k8s/service.yml'
-                bat 'kubectl apply -f k8s/ingress.yml'
+                bat 'kubectl apply -f k8s/pvc.yml --validate=false'
+                bat 'kubectl apply -f k8s/deployment.yml --validate=false'
+                bat 'kubectl apply -f k8s/service.yml --validate=false'
+                bat 'kubectl apply -f k8s/ingress.yml --validate=false'
             }
         }
     }
