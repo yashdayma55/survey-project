@@ -4,6 +4,7 @@ pipeline {
         DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
         DOCKER_IMAGE_NAME = 'yashdayma55/survey-app'
         DOCKER_IMAGE_TAG = 'latest'
+        KUBECONFIG = 'C:\\ProgramData\\Jenkins\\.kube\\config'
     }
     stages {
         stage('Checkout') {
