@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block styles %}
+<style>
+    /* Custom styles for checkboxes and radio buttons */
+    .form-check-input {
+        width: 1.25em;
+        height: 1.25em;
+        margin-top: 0.25em;
+        vertical-align: top;
+        background-color: #fff;
+        border: 2px solid #007bff;
+        cursor: pointer;
+    }
+
+    .form-check-input:checked {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .form-check-label {
+        margin-left: 0.5em;
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .bg-light .form-check-input {
+        background-color: #fff;
+    }
+
+    .form-check {
+        margin-bottom: 0.5em;
+    }
+
+    legend {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5em;
+    }
+
+    .star {
+        color: red;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="text-center">Student Survey Form</h1>
+{% if messages %}
+{% for message in messages %}
+<div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+    {{ message }}
+</div>
+{% endfor %}
+{% endif %}
+{% if errors %}
+<div class="alert alert-danger">
+    <ul>
+        {% for error in errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+<form method="post" class="p-4 border rounded bg-light shadow" id="surveyForm" onsubmit="return validateForm(event)">
+    {% csrf_token %}
+    <div class="form-group">
+        <p class="pt-2 pb-2">(Required fields are indicated by a <span class="star">*</span> mark )</p>
+        <label for="first-name">First Name <span class="star">*</span></label>
+        <input type="text" id="first-name" name="first-name" class="form-control" value="{{ form_data.first_name|default_if_none:'' }}" required autofocus>
+    </div>
+    <div class="form-group">
+        <label for="last-name">Last Name <span class="star">*</span></label>
+        <input type="text" id="last-name" name="last-name" class="form-control" value="{{ form_data.last_name|default_if_none:'' }}" required>
+    </div>
+    <div class="form-group">
+        <label for="address">Street Address <span class="star">*</span></label>
+        <input type="text" id="address" name="address" class="form-control" value="{{ form_data.address|default_if_none:'' }}" required>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-4">
+            <label for="city">City <span class="star">*</span></label>
+            <input type="text" id="city" name="city" class="form-control" value="{{ form_data.city|default_if_none:'' }}" required>
+        </div>
+        <div class="form-group col-md-4">
+            <label for="state">State <span class="star">*</span></label>
+            <input type="text" id="state" name="state" class="form-control" value="{{ form_data.state|default_if_none:'' }}" required>
+        </div>
+        <div class="form-group col-md-4">
+            <label for="zip">Zip Code <span class="star">*</span></label>
+            <input type="text" id="zip" name="zip" class="form-control" value="{{ form_data.zipcode|default_if_none:'' }}" required>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="phone">Telephone <span class="star">*</span></label>
+        <input type="tel" id="phone" name="phone" class="form-control" placeholder="+1 123-456-7890" value="{{ form_data.phone|default_if_none:'' }}" required>
+    </div>
+    <div class="form-group">
+        <label for="raffle">Raffle</label>
+        <input type="text" id="raffle" name="raffle" class="form-control" placeholder="Enter at least 10 comma-separated numbers (1-100)" value="{{ form_data.raffle|default_if_none:'' }}" oninput="validateRaffle()">
+        <small id="raffleError" class="text-danger form-text"></small>
+    </div>
+    <div class="form-group">
+        <label for="email">Email <span class="star">*</span></label>
+        <input type="email" id="email" name="email" class="form-control" placeholder="example@gmu.edu" value="{{ form_data.email|default_if_none:'' }}" required>
+    </div>
+    <div class="form-group">
+        <label for="url">Personal Website</label>
+        <input type="url" id="url" name="url" class="form-control" placeholder="https://example.com" value="{{ form_data.url|default_if_none:'' }}">
+    </div>
+    <div class="form-group">
+        <label for="survey-date">Date of Survey <span class="star">*</span></label>
+        <input type="date" id="survey-date" name="survey-date" class="form-control" value="{{ form_data.survey_date|default_if_none:'' }}" required>
+    </div>
+    <fieldset class="form-group">
+        <legend>What did you like most about the campus? <span class="star">*</span></legend>
+        <div class="form-check">
+            <input type="checkbox" id="students" name="likes" value="students" class="form-check-input" {% if 'students' in likes %}checked{% endif %}>
+            <label for="students" class="form-check-label">Students</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" id="location" name="likes" value="location" class="form-check-input" {% if 'location' in likes %}checked{% endif %}>
+            <label for="location" class="form-check-label">Location</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" id="campus" name="likes" value="campus" class="form-check-input" {% if 'campus' in likes %}checked{% endif %}>
+            <label for="campus" class="form-check-label">Campus</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" id="atmosphere" name="likes" value="atmosphere" class="form-check-input" {% if 'atmosphere' in likes %}checked{% endif %}>
+            <label for="atmosphere" class="form-check-label">Atmosphere</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" id="dorms" name="likes" value="dormRooms" class="form-check-input" {% if 'dormRooms' in likes %}checked{% endif %}>
+            <label for="dorms" class="form-check-label">Dorm Rooms</label>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" id="sports" name="likes" value="sports" class="form-check-input" {% if 'sports' in likes %}checked{% endif %}>
+            <label for="sports" class="form-check-label">Sports</label>
+        </div>
+    </fieldset>
+    <fieldset class="form-group">
+        <legend>How did you become interested in the university? <span class="star">*</span></legend>
+        <div class="form-check">
+            <input type="radio" id="friends" name="interest" value="friends" class="form-check-input" {% if form_data.interest == 'friends' %}checked{% endif %} onclick="toggleOtherInput(false)" required>
+            <label for="friends" class="form-check-label">Friends</label>
+        </div>
+        <div class="form-check">
+            <input type="radio" id="television" name="interest" value="television" class="form-check-input" {% if form_data.interest == 'television' %}checked{% endif %} onclick="toggleOtherInput(false)" required>
+            <label for="television" class="form-check-label">Television</label>
+        </div>
+        <div class="form-check">
+            <input type="radio" id="internet" name="interest" value="internet" class="form-check-input" {% if form_data.interest == 'internet' %}checked{% endif %} onclick="toggleOtherInput(false)" required>
+            <label for="internet" class="form-check-label">Internet</label>
+        </div>
+        <div class="form-check">
+            <input type="radio" id="other" name="interest" value="other" class="form-check-input" {% if form_data.interest == 'other' %}checked{% endif %} onclick="toggleOtherInput(true)" required>
+            <label for="other" class="form-check-label">Other</label>
+        </div>
+        <div id="other-input" style="display: {% if form_data.interest == 'other' %}block{% else %}none{% endif %}; margin-top: 10px;">
+            <input type="text" id="other-text" name="other-text" class="form-control" placeholder="Please specify" value="{{ form_data.other_text|default_if_none:'' }}">
+        </div>
+    </fieldset>
+    <div class="form-group">
+        <label for="comments">Additional Comments</label>
+        <textarea id="comments" name="comments" class="form-control" rows="4" placeholder="Enter Comments here">{{ form_data.comments|default_if_none:'' }}</textarea>
+    </div>
+    <div class="form-group">
+        <label for="recommendation">Likelihood of Recommending George Mason <span class="star">*</span></label>
+        <select id="recommendation" name="recommendation" class="form-control" required>
+            <option value="" disabled {% if not form_data.recommendation %}selected{% endif %}>Select an option</option>
+            <option value="Very Likely" {% if form_data.recommendation == 'Very Likely' %}selected{% endif %}>Very Likely</option>
+            <option value="Likely" {% if form_data.recommendation == 'Likely' %}selected{% endif %}>Likely</option>
+            <option value="Unlikely" {% if form_data.recommendation == 'Unlikely' %}selected{% endif %}>Unlikely</option>
+        </select>
+    </div>
+    <div class="form-group text-center">
+        <button type="submit" class="btn btn-success">Submit Survey</button>
+        <button type="button" class="btn btn-danger" onclick="resetForm()">Cancel</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleOtherInput(show) {
+    document.getElementById("other-input").style.display = show ? "block" : "none";
+    if (!show) {
+        document.getElementById("other-text").value = "";
+    }
+}
+
+function validateRaffle() {
+    const raffleInput = document.getElementById("raffle").value.trim();
+    const raffleError = document.getElementById("raffleError");
+
+    raffleError.textContent = "";
+
+    if (!raffleInput) {
+        return true; // Raffle is optional
+    }
+
+    const numbers = raffleInput.split(',').map(num => num.trim());
+    if (numbers.length < 10) {
+        raffleError.textContent = "Please enter at least 10 numbers separated by commas.";
+        return false;
+    }
+
+    const validNumbers = numbers.map(num => {
+        const parsed = parseInt(num, 10);
+        return !isNaN(parsed) && parsed >= 1 && parsed <= 100 ? parsed : null;
+    }).filter(num => num !== null);
+
+    if (validNumbers.length < 10) {
+        raffleError.textContent = "All values must be numbers between 1 and 100, and at least 10 numbers are required.";
+        return false;
+    }
+
+    return true;
+}
+
+function validateForm(event) {
+    const form = document.getElementById("surveyForm");
+    const errors = [];
+
+    // First Name validation
+    const firstName = document.getElementById("first-name").value;
+    const nameRegex = /^[A-Za-z]+$/;
+    if (!nameRegex.test(firstName)) {
+        errors.push("First Name should contain only alphabets.");
+        document.getElementById("first-name").value = "";
+    }
+
+    // Last Name validation
+    const lastName = document.getElementById("last-name").value;
+    if (!nameRegex.test(lastName)) {
+        errors.push("Last Name should contain only alphabets.");
+        document.getElementById("last-name").value = "";
+    }
+
+    // Address validation
+    const address = document.getElementById("address").value;
+    const addressRegex = /^[A-Za-z0-9\s,'-]*$/;
+    if (!addressRegex.test(address)) {
+        errors.push("Address should contain only alphanumeric characters, spaces, commas, or hyphens.");
+        document.getElementById("address").value = "";
+    }
+
+    // Email validation
+    const email = document.getElementById("email").value;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        errors.push("Please enter a valid email address.");
+        document.getElementById("email").value = "";
+    }
+
+    // Likes validation
+    const likes = Array.from(document.querySelectorAll('input[name="likes"]:checked')).map(input => input.value);
+    if (likes.length === 0) {
+        errors.push('Please select at least one option for "What did you like most about the campus?"');
+        document.querySelectorAll('input[name="likes"]').forEach(input => input.checked = false);
+    }
+
+    // Interest validation
+    const interest = document.querySelector('input[name="interest"]:checked');
+    if (!interest) {
+        errors.push('Please select an option for "How did you become interested in the university?"');
+    }
+
+    // Raffle validation
+    const raffleValid = validateRaffle();
+    if (!raffleValid) {
+        errors.push(document.getElementById("raffleError").textContent);
+    }
+
+    if (errors.length > 0) {
+        alert("Please fix the following errors before submitting:\n\n" + errors.join("\n"));
+        return false;
+    }
+
+    // Prepare likes as a comma-separated string
+    const likesInput = document.createElement('input');
+    likesInput.type = 'hidden';
+    likesInput.name = 'likes';
+    likesInput.value = likes.join(',');
+    form.appendChild(likesInput);
+
+    return true; // Allow form submission to Django backend
+}
+
+function resetForm() {
+    if (confirm("Are you sure you want to reset the form?")) {
+        const form = document.getElementById("surveyForm");
+        form.reset();
+        document.getElementById("raffleError").textContent = "";
+        document.getElementById("other-input").style.display = "none";
+        document.getElementById("other-text").value = "";
+    }
+}
+</script>
+{% endblock %}
