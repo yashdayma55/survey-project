@@ -2,13 +2,13 @@ pipeline {
     agent any
     environment {
         DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
-        DOCKER_IMAGE_NAME = 'yashdayma55/survey-app'  # Replace with your Docker Hub username
+        DOCKER_IMAGE_NAME = 'yashdayma55/survey-app'
         DOCKER_IMAGE_TAG = 'latest'
     }
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/yashdayma55/survey-project.git', branch: 'main'  # Replace with your repo URL
+                git url: 'https://github.com/yashdayma55/survey-project.git', branch: 'main'
             }
         }
         stage('Build Docker Image') {
@@ -29,17 +29,16 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f k8s/pvc.yml'
-                sh 'kubectl apply -f k8s/deployment.yml'
-                sh 'kubectl apply -f k8s/service.yml'
-                sh 'kubectl apply -f k8s/ingress.yml'
+                bat 'kubectl apply -f ../k8s/pvc.yml'
+                bat 'kubectl apply -f ../k8s/deployment.yml'
+                bat 'kubectl apply -f ../k8s/service.yml'
+                bat 'kubectl apply -f ../k8s/ingress.yml'
             }
         }
     }
     post {
         always {
-            sh 'docker rmi ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} || true'
+            bat 'docker rmi %DOCKER_IMAGE_NAME%:%DOCKER_IMAGE_TAG% || exit 0'
         }
     }
 }
-
