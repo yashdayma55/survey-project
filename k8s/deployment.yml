@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: survey-app
-        image: yourusername/survey-app:latest  # Replace with your Docker Hub username
+        image: yashdayma55/survey-app:latest  
         ports:
         - containerPort: 8000
         env:
